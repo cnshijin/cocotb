@@ -27,7 +27,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. '''
 Drivers for Advanced Microcontroller Bus Architecture
 """
 import cocotb
-from cocotb.triggers import RisingEdge, ReadOnly, Lock
+from cocotb.triggers import RisingEdge, ReadOnly, ReadWrite, Lock
 from cocotb.drivers import BusDriver
 from cocotb.result import ReturnValue
 from cocotb.binary import BinaryValue
@@ -351,13 +351,13 @@ class AXI4StreamMaster(BusDriver):
         #Drive default values onto bus
         self.width = width
         self.strobe_width = width / 8
-        self.bus.TVALID <= 0
-        self.bus.TLAST  <= 0;
-        self.bus.TDATA  <= 0;
-        self.bus.TKEEP  <= 0;
-        self.bus.TID    <= 0;
-        self.bus.TDEST  <= 0;
-        self.bus.TUSER  <= 0;
+        self.bus.TVALID.setimmediatevalue(0)
+        self.bus.TLAST.setimmediatevalue(0)
+        self.bus.TDATA.setimmediatevalue(0)
+        self.bus.TKEEP.setimmediatevalue(0)
+        self.bus.TID.setimmediatevalue(0)
+        self.bus.TDEST.setimmediatevalue(0)
+        self.bus.TUSER.setimmediatevalue(0)
 
         self.write_data_busy = Lock("%s_wbusy" % name)
 
@@ -379,10 +379,11 @@ class AXI4StreamMaster(BusDriver):
         #Wait for the slave to assert tready
         while True:
             yield ReadOnly()
-            yield RisingEdge(self.clock)
             if self.bus.TREADY.value:
                 break
+            yield RisingEdge(self.clock)
 
+        yield RisingEdge(self.clock)
         #every clock cycle update the data
         for i in range (len(data)):
             self.bus.TVALID <=  1
@@ -395,6 +396,7 @@ class AXI4StreamMaster(BusDriver):
                     yield RisingEdge(self.clock)
                     yield ReadOnly()
                     if self.bus.TREADY.value:
+                        yield RisingEdge(self.clock)
                         break
                 continue
             yield RisingEdge(self.clock)
