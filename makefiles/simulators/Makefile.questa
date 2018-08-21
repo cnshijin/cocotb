@@ -135,9 +135,9 @@ endif
 
 INT_LIBS := $(COCOTB_VPI_LIB) $(COCOTB_FLI_LIB)
 
-ifneq ($(ARCH),i686)
-CMD += -64
-endif
+# ifneq ($(ARCH),i686)
+# CMD += -64
+# endif
 
 # Depending on the version of modelsim the interfaces that it supports can change
 # Append or remove values to INT_LIBS depenending on your license
